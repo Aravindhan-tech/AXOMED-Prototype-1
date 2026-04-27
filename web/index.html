@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AXOMED Health Monitor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00ffcc;
+            --secondary: #00cc99;
+            --danger: #ff4757;
+            --warning: #ffa502;
+            --success: #2ed573;
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --text-primary: #ffffff;
+            --text-secondary: #8892b0;
+            --glow: 0 0 20px rgba(0, 255, 204, 0.3);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(0, 255, 204, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 204, 153, 0.06) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg-dark) 0%, #0d1117 100%);
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 204, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Header */
+        header {
+            padding: 30px 20px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(0, 255, 204, 0.1) 0%, transparent 100%);
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: 8px;
+            background: linear-gradient(135deg, var(--primary) 0%, #00cc99 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: var(--glow);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            letter-spacing: 4px;
+            margin-top: 10px;
+        }
+
+        /* Health Index Circle */
+        .health-index-container {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .health-index-wrapper {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+
+        .health-index-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--danger) 0deg,
+                var(--warning) 120deg,
+                var(--success) 240deg,
+                var(--success) 360deg
+            );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: rotateGradient 4s linear infinite;
+        }
+
+        @keyframes rotateGradient {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .health-index-inner {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .health-index-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: var(--glow);
+        }
+
+        .health-index-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .health-status {
+            margin-top: 10px;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .status-excellent { background: rgba(46, 213, 115, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .status-good { background: rgba(0, 255, 204, 0.2); color: var(--primary); border: 1px solid var(--primary); }
+        .status-fair { background: rgba(255, 165, 2, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+        .status-poor { background: rgba(255, 71, 87, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+
+        /* Sensor Grid */
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sensor-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 255, 204, 0.1);
+        }
+
+        .sensor-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sensor-card:hover {
+            transform: translateY(-5px);
+            background: var(--bg-card-hover);
+            border-color: rgba(0, 255, 204, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 255, 204, 0.1);
+        }
+
+        .sensor-card:hover::before {
+            opacity: 1;
+        }
+
+        .sensor-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .sensor-name {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .sensor-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+        }
+
+        .sensor-unit {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .sensor-range {
+            margin-top: 15px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .range-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .range-indicator {
+            position: absolute;
+            height: 100%;
+            border-radius: 2px;
+            transition: all 0.5s ease;
+        }
+
+        .sensor-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .status-normal { background: var(--success); box-shadow: 0 0 10px var(--success); }
+        .status-warning { background: var(--warning); box-shadow: 0 0 10px var(--warning); }
+        .status-danger { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+
+        /* Analysis Section */
+        .analysis-section {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .analysis-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(0, 255, 204, 0.1);
+        }
+
+        .analysis-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--primary);
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 255, 204, 0.2);
+        }
+
+        .analysis-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .analysis-item:last-child {
+            border-bottom: none;
+        }
+
+        .analysis-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .analysis-value {
+            font-weight: 500;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(0, 255, 204, 0.1);
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo { font-size: 1.8rem; letter-spacing: 4px; }
+            .sensor-grid { padding: 20px; }
+            .health-index-wrapper { width: 160px; height: 160px; }
+            .health-index-inner { width: 130px; height: 130px; }
+            .health-index-value { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <header>
+        <h1 class="logo">AXOMED</h1>
+        <p class="subtitle">Real-Time Health Monitor</p>
+    </header>
+
+    <!-- Health Index Display -->
+    <div class="health-index-container">
+        <div class="health-index-wrapper">
+            <div class="health-index-circle">
+                <div class="health-index-inner">
+                    <span class="health-index-value" id="healthIndex">--</span>
+                    <span class="health-index-label">Health Index</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="text-align: center;">
+        <span class="health-status" id="healthStatus">Initializing...</span>
+    </div>
+
+    <!-- Sensor Cards -->
+    <div class="sensor-grid">
+        <!-- Room Temperature -->
+        <div class="sensor-card">
+            <div class="sensor-status status-normal" id="roomTempStatus"></div>
+            <div class="sensor-icon">🌡️</div>
+            <div class="sensor-name">Room Temperature</div>
+            <div class="sensor-value">
+                <span id="roomTemp">--</span>
+                <span class="sensor-unit">°C</span>
+            </div>
+            <div class="sensor-range">Normal: 20-24°C</div>
+            <div class="range-bar">
+                <div class="range-indicator" id="roomTempBar" style="width: 0%; background: var(--primary);"></div>
+            </div>
+        </div>
+
+        <!-- Humidity -->
+        <div class="sensor-card">
+            <div class="sensor-status status-normal" id="humidityStatus"></div>
+            <div class="sensor-icon">💧</div>
+            <div class="sensor-name">Room Humidity</div>
+            <div class="sensor-value">
+                <span id="humidity">--</span>
+                <span class="sensor-unit">%</span>
+            </div>
+            <div class="sensor-range">Normal: 40-60%</div>
+            <div class="range-bar">
+                <div class="range-indicator" id="humidityBar" style="width: 0%; background: var(--primary);"></div>
+            </div>
+        </div>
+
+        <!-- Body Temperature -->
+        <div class="sensor-card">
+            <div class="sensor-status status-normal" id="bodyTempStatus"></div>
+            <div class="sensor-icon">🫀</div>
+            <div class="sensor-name">Body Temperature</div>
+            <div class="sensor-value">
+                <span id="bodyTemp">--</span>
+                <span class="sensor-unit">°C</span>
+            </div>
+            <div class="sensor-range">Normal: 36.1-37.2°C</div>
+            <div class="range-bar">
+                <div class="range-indicator" id="bodyTempBar" style="width: 0%; background: var(--primary);"></div>
+            </div>
+        </div>
+
+        <!-- Heart Rate -->
+        <div class="sensor-card">
+            <div class="sensor-status status-normal" id="bpmStatus"></div>
+            <div class="sensor-icon">❤️</div>
+            <div class="sensor-name">Heart Rate</div>
+            <div class="sensor-value">
+                <span id="bpm">--</span>
+                <span class="sensor-unit">BPM</span>
+            </div>
+            <div class="sensor-range">Normal: 60-100 BPM</div>
+            <div class="range-bar">
+                <div class="range-indicator" id="bpmBar" style="width: 0%; background: var(--primary);"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Section -->
+    <div class="analysis-section">
+        <div class="analysis-grid">
+            <!-- Health Metrics Analysis -->
+            <div class="analysis-card">
+                <h3 class="analysis-title">📊 Health Analysis</h3>
+                <div class="analysis-item">
+                    <span class="analysis-label">Cardiovascular Health</span>
+                    <span class="analysis-value" id="cardioHealth">--</span>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-label">Temperature Status</span>
+                    <span class="analysis-value" id="tempStatus">--</span>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-label">Comfort Index</span>
+                    <span class="analysis-value" id="comfortIndex">--</span>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-label">Overall Status</span>
+                    <span class="analysis-value" id="overallStatus">--</span>
+                </div>
+            </div>
+
+            <!-- Medical Reference -->
+            <div class="analysis-card">
+                <h3 class="analysis-title">🏥 Medical Reference</h3>
+                <div class="analysis-item">
+                    <span class="analysis-label">Heart Rate Zone</span>
+                    <span class="analysis-value" id="hrZone">--</span>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-label">Body Temp Category</span>
+                    <span class="analysis-value" id="tempCategory">--</span>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-label">Fever Risk</span>
+                    <span class="analysis-value" id="feverRisk">--</span>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-label">Environment Score</span>
+                    <span class="analysis-value" id="envScore">--</span>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="analysis-card">
+                <h3 class="analysis-title">💡 Recommendations</h3>
+                <div class="analysis-item">
+                    <span class="analysis-label">Activity Suggestion</span>
+                    <span class="analysis-value" id="activitySuggestion">--</span>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-label">Hydration Advice</span>
+                    <span class="analysis-value" id="hydration">--</span>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-label">Room Adjustment</span>
+                    <span class="analysis-value" id="roomAdvice">--</span>
+                </div>
+                <div class="analysis-item">
+                    <span class="analysis-label">Alert Level</span>
+                    <span class="analysis-value" id="alertLevel">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="connection-status">
+            <span class="status-dot"></span>
+            <span>Connected to ESP32</span>
+        </div>
+        <p>AXOMED Health Monitor v1.0 | Last Update: <span id="lastUpdate">--</span></p>
+    </footer>
+
+    <script>
+        // ==================== HEALTH CALCULATION FORMULAS ====================
+        
+        // Normal ranges
+        const RANGES = {
+            roomTemp: { min: 20, max: 24, ideal: 22 },
+            humidity: { min: 40, max: 60, ideal: 50 },
+            bodyTemp: { min: 36.1, max: 37.2, ideal: 36.6 },
+            bpm: { min: 60, max: 100, ideal: 72 }
+        };
+
+        // Calculate individual metric score (0-100)
+        function calculateMetricScore(value, range) {
+            if (value >= range.ideal - 0.5 && value <= range.ideal + 0.5) return 100;
+            if (value >= range.min && value <= range.max) {
+                const distFromIdeal = Math.min(Math.abs(value - range.ideal - 0.5), Math.abs(value - range.ideal + 0.5));
+                const maxDist = Math.max(range.max - range.ideal, range.ideal - range.min);
+                return Math.max(60, 100 - (distFromIdeal / maxDist) * 40);
+            }
+            // Outside normal range
+            const dist = value < range.min ? range.min - value : value - range.max;
+            return Math.max(0, 50 - dist * 10);
+        }
+
+        // Calculate Heart Rate Zone
+        function getHeartRateZone(bpm) {
+            if (bpm < 60) return { zone: 'Resting', color: '#ffa502' };
+            if (bpm < 80) return { zone: 'Normal', color: '#2ed573' };
+            if (bpm < 100) return { zone: 'Active', color: '#00ffcc' };
+            if (bpm < 120) return { zone: 'Exercise', color: '#ffa502' };
+            return { zone: 'High', color: '#ff4757' };
+        }
+
+        // Calculate Body Temperature Category
+        function getBodyTempCategory(temp) {
+            if (temp < 36.0) return { category: 'Hypothermia', risk: 'High', color: '#3498db' };
+            if (temp < 36.5) return { category: 'Low Normal', risk: 'Low', color: '#2ed573' };
+            if (temp <= 37.0) return { category: 'Normal', risk: 'None', color: '#2ed573' };
+            if (temp <= 37.5) return { category: 'Elevated', risk: 'Low', color: '#ffa502' };
+            if (temp <= 38.0) return { category: 'Low Grade Fever', risk: 'Medium', color: '#ff4757' };
+            return { category: 'Fever', risk: 'High', color: '#ff4757' };
+        }
+
+        // Calculate Comfort Index (based on room temp and humidity)
+        function calculateComfortIndex(temp, humidity) {
+            // Heat Index formula approximation
+            const heatIndex = temp + 0.05 * humidity;
+            if (heatIndex < 20) return { index: 'Cold', score: 70 };
+            if (heatIndex < 24) return { index: 'Comfortable', score: 100 };
+            if (heatIndex < 28) return { index: 'Warm', score: 80 };
+            if (heatIndex < 32) return { index: 'Hot', score: 60 };
+            return { index: 'Very Hot', score: 40 };
+        }
+
+        // Calculate Overall Health Index
+        function calculateHealthIndex(data) {
+            const weights = {
+                bpm: 0.35,           // Heart rate is most important
+                bodyTemp: 0.35,      // Body temp is critical
+                roomTemp: 0.15,     // Environment matters
+                humidity: 0.15      // Humidity affects comfort
+            };
+
+            const scores = {
+                bpm: calculateMetricScore(data.bpm, RANGES.bpm),
+                bodyTemp: calculateMetricScore(data.bodyTemp, RANGES.bodyTemp),
+                roomTemp: calculateMetricScore(data.roomTemp, RANGES.roomTemp),
+                humidity: calculateMetricScore(data.humidity, RANGES.humidity)
+            };
+
+            let healthIndex = 
+                scores.bpm * weights.bpm +
+                scores.bodyTemp * weights.bodyTemp +
+                scores.roomTemp * weights.roomTemp +
+                scores.humidity * weights.humidity;
+
+            return Math.round(healthIndex);
+        }
+
+        // Get Health Status
+        function getHealthStatus(index) {
+            if (index >= 90) return { status: 'Excellent', class: 'status-excellent' };
+            if (index >= 75) return { status: 'Good', class: 'status-good' };
+            if (index >= 60) return { status: 'Fair', class: 'status-fair' };
+            return { status: 'Needs Attention', class: 'status-poor' };
+        }
+
+        // Get Activity Suggestion
+        function getActivitySuggestion(bpm, bodyTemp) {
+            if (bodyTemp > 37.5) return 'Rest Recommended';
+            if (bpm > 100) return 'Light Activity';
+            if (bpm > 80) return 'Moderate Activity';
+            return 'Any Activity OK';
+        }
+
+        // Get Hydration Advice
+        function getHydrationAdvice(roomTemp, humidity) {
+            if (roomTemp > 26 || humidity < 40) return 'Increase Water Intake';
+            if (roomTemp > 24) return 'Regular Water Intake';
+            return 'Normal Hydration';
+        }
+
+        // Get Room Adjustment Advice
+        function getRoomAdvice(roomTemp, humidity) {
+            if (roomTemp < 20) return 'Increase Room Temperature';
+            if (roomTemp > 24) return 'Decrease Room Temperature';
+            if (humidity < 40) return 'Use Humidifier';
+            if (humidity > 60) return 'Use Dehumidifier';
+            return 'Environment Optimal';
+        }
+
+        // Update Range Bar
+        function updateRangeBar(elementId, value, min, max, ideal) {
+            const bar = document.getElementById(elementId);
+            const percentage = ((value - min) / (max - min)) * 100;
+            bar.style.width = Math.min(100, Math.max(0, percentage)) + '%';
+            
+            // Color based on how close to ideal
+            if (Math.abs(value - ideal) <= 1) {
+                bar.style.background = 'var(--success)';
+            } else if (value >= min && value <= max) {
+                bar.style.background = 'var(--primary)';
+            } else {
+                bar.style.background = 'var(--danger)';
+            }
+        }
+
+        // Update Status Indicator
+        function updateStatus(elementId, isNormal) {
+            const status = document.getElementById(elementId);
+            status.className = 'sensor-status ' + (isNormal ? 'status-normal' : 'status-warning');
+        }
+
+        // Main Data Fetch Function
+        async function getData() {
+            try {
+                let res = await fetch("/sensor");
+                let data = await res.json();
+
+                // Update sensor values
+                document.getElementById("roomTemp").innerText = data.roomTemp.toFixed(1);
+                document.getElementById("humidity").innerText = data.humidity.toFixed(1);
+                document.getElementById("bodyTemp").innerText = data.bodyTemp.toFixed(1);
+                document.getElementById("bpm").innerText = data.bpm;
+
+                // Calculate Health Index
+                const healthIndex = calculateHealthIndex(data);
+                document.getElementById("healthIndex").innerText = healthIndex;
+
+                const healthStatus = getHealthStatus(healthIndex);
+                const statusEl = document.getElementById("healthStatus");
+                statusEl.innerText = healthStatus.status;
+                statusEl.className = 'health-status ' + healthStatus.class;
+
+                // Update Range Bars
+                updateRangeBar('roomTempBar', data.roomTemp, 15, 30, 22);
+                updateRangeBar('humidityBar', data.humidity, 20, 80, 50);
+                updateRangeBar('bodyTempBar', data.bodyTemp, 35, 39, 36.6);
+                updateRangeBar('bpmBar', data.bpm, 40, 140, 72);
+
+                // Update Status Indicators
+                updateStatus('roomTempStatus', data.roomTemp >= 20 && data.roomTemp <= 24);
+                updateStatus('humidityStatus', data.humidity >= 40 && data.humidity <= 60);
+                updateStatus('bodyTempStatus', data.bodyTemp >= 36.1 && data.bodyTemp <= 37.2);
+                updateStatus('bpmStatus', data.bpm >= 60 && data.bpm <= 100);
+
+                // Update Analysis Section
+                const hrZone = getHeartRateZone(data.bpm);
+                document.getElementById('hrZone').innerText = hrZone.zone;
+                document.getElementById('hrZone').style.background = hrZone.color + '20';
+                document.getElementById('hrZone').style.color = hrZone.color;
+
+                const tempCat = getBodyTempCategory(data.bodyTemp);
+                document.getElementById('tempCategory').innerText = tempCat.category;
+                document.getElementById('tempCategory').style.background = tempCat.color + '20';
+                document.getElementById('tempCategory').style.color = tempCat.color;
+
+                document.getElementById('feverRisk').innerText = tempCat.risk;
+                document.getElementById('feverRisk').style.background = tempCat.risk === 'High' ? 'rgba(255,71,87,0.2)' : tempCat.risk === 'Medium' ? 'rgba(255,165,2,0.2)' : 'rgba(46,213,115,0.2)';
+                document.getElementById('feverRisk').style.color = tempCat.risk === 'High' ? '#ff4757' : tempCat.risk === 'Medium' ? '#ffa502' : '#2ed573';
+
+                const comfort = calculateComfortIndex(data.roomTemp, data.humidity);
+                document.getElementById('comfortIndex').innerText = comfort.index;
+                document.getElementById('comfortIndex').style.background = comfort.score >= 80 ? 'rgba(46,213,115,0.2)' : 'rgba(255,165,2,0.2)';
+                document.getElementById('comfortIndex').style.color = comfort.score >= 80 ? '#2ed573' : '#ffa502';
+
+                // Cardiovascular Health
+                const cardioScore = calculateMetricScore(data.bpm, RANGES.bpm);
+                document.getElementById('cardioHealth').innerText = cardioScore >= 80 ? 'Healthy' : cardioScore >= 60 ? 'Normal' : 'Check Needed';
+                document.getElementById('cardioHealth').style.background = cardioScore >= 80 ? 'rgba(46,213,115,0.2)' : cardioScore >= 60 ? 'rgba(0,255,204,0.2)' : 'rgba(255,71,87,0.2)';
+                document.getElementById('cardioHealth').style.color = cardioScore >= 80 ? '#2ed573' : cardioScore >= 60 ? '#00ffcc' : '#ff4757';
+
+                // Temperature Status
+                document.getElementById('tempStatus').innerText = tempCat.category;
+                document.getElementById('tempStatus').style.background = tempCat.color + '20';
+                document.getElementById('tempStatus').style.color = tempCat.color;
+
+                // Environment Score
+                const envScore = (calculateMetricScore(data.roomTemp, RANGES.roomTemp) + calculateMetricScore(data.humidity, RANGES.humidity)) / 2;
+                document.getElementById('envScore').innerText = Math.round(envScore) + '/100';
+                document.getElementById('envScore').style.background = envScore >= 80 ? 'rgba(46,213,115,0.2)' : 'rgba(255,165,2,0.2)';
+                document.getElementById('envScore').style.color = envScore >= 80 ? '#2ed573' : '#ffa502';
+
+                // Overall Status
+                document.getElementById('overallStatus').innerText = healthStatus.status;
+                document.getElementById('overallStatus').className = 'analysis-value ' + healthStatus.class;
+
+                // Recommendations
+                document.getElementById('activitySuggestion').innerText = getActivitySuggestion(data.bpm, data.bodyTemp);
+                document.getElementById('activitySuggestion').style.background = 'rgba(0,255,204,0.2)';
+                document.getElementById('activitySuggestion').style.color = '#00ffcc';
+
+                document.getElementById('hydration').innerText = getHydrationAdvice(data.roomTemp, data.humidity);
+                document.getElementById('hydration').style.background = 'rgba(0,204,153,0.2)';
+                document.getElementById('hydration').style.color = '#00cc99';
+
+                document.getElementById('roomAdvice').innerText = getRoomAdvice(data.roomTemp, data.humidity);
+                document.getElementById('roomAdvice').style.background = 'rgba(255,165,2,0.2)';
+                document.getElementById('roomAdvice').style.color = '#ffa502';
+
+                // Alert Level
+                let alertLevel = 'Normal';
+                let alertColor = '#2ed573';
+                if (data.bodyTemp > 37.5 || data.bpm > 120 || data.bpm < 50) {
+                    alertLevel = 'High';
+                    alertColor = '#ff4757';
+                } else if (data.bodyTemp > 37.2 || data.bpm > 100 || data.bpm < 60) {
+                    alertLevel = 'Medium';
+                    alertColor = '#ffa502';
+                }
+                document.getElementById('alertLevel').innerText = alertLevel;
+                document.getElementById('alertLevel').style.background = alertColor + '20';
+                document.getElementById('alertLevel').style.color = alertColor;
+
+                // Update timestamp
+                const now = new Date();
+                document.getElementById('lastUpdate').innerText = now.toLocaleTimeString();
+
+            } catch (error) {
+                console.error('Error fetching sensor data:', error);
+                document.getElementById('healthIndex').innerText = '--';
+                document.getElementById('healthStatus').innerText = 'Connection Error';
+                document.getElementById('healthStatus').className = 'health-status status-poor';
+            }
+        }
+
+        // Initial fetch and set interval
+        getData();
+        setInterval(getData, 1000);
+    </script>
+</body>
+</html>

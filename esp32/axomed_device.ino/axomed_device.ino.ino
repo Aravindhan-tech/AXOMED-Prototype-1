@@ -16,11 +16,10 @@
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 // WiFi
-const char* ssid = "OPPO";
-const char* password = "amma2appa";
+const char* ssid = "axomed";
+const char* password = "axomed123";
 
-String serverName = "http://10.185.252.1:3000/sensor";
-
+String serverName = "http://172.25.227.1:3000/sensor";
 // DHT11
 #define DHTPIN 4
 #define DHTTYPE DHT11
@@ -138,4 +137,3 @@ http.end();
 delay(2000);
 
 }
-
